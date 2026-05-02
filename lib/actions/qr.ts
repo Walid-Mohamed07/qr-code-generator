@@ -93,7 +93,7 @@ export async function createQr(
     revalidatePath('/history');
     revalidatePath('/dashboard');
 
-    return { data: serialise(qr.toObject()) };
+    return { data: serialise(qr.toObject() as unknown as Record<string, unknown>) };
   } catch (err: unknown) {
     console.error('[createQr]', err);
     return { error: 'Failed to save QR code. Please try again.' };
