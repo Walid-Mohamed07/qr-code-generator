@@ -10,34 +10,35 @@
     "seed": "npx ts-node --project tsconfig.scripts.json scripts/seed.ts"
   },
   "dependencies": {
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.395.0",
+    "mongoose": "^8.4.1",
+    "nanoid": "^5.0.7",
     "next": "14.2.29",
+    "next-themes": "^0.3.0",
+    "qr-code-styling": "^1.9.2",
+    "qrcode": "^1.5.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "mongoose": "^8.4.1",
-    "qrcode": "^1.5.3",
-    "nanoid": "^5.0.7",
-    "zustand": "^4.5.4",
-    "recharts": "^2.12.7",
-    "zod": "^3.23.8",
-    "next-themes": "^0.3.0",
     "react-hot-toast": "^2.4.1",
-    "lucide-react": "^0.395.0",
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^2.3.0"
+    "recharts": "^2.12.7",
+    "tailwind-merge": "^2.3.0",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
     "@types/node": "^20.14.2",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "@types/qrcode": "^1.5.5",
-    "typescript": "^5.4.5",
-    "tailwindcss": "^3.4.4",
-    "postcss": "^8.4.38",
     "autoprefixer": "^10.4.19",
+    "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.29",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4",
     "ts-node": "^10.9.2",
-    "dotenv": "^16.4.5",
-    "tsconfig-paths": "^4.2.0"
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.4.5"
   }
 }

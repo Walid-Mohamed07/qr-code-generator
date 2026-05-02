@@ -3,7 +3,7 @@ import { headers } from 'next/headers';
 import { Mail, Phone, FileText, ExternalLink } from 'lucide-react';
 import { connectDB } from '@/lib/mongoose';
 import QrCode from '@/models/QrCode';
-import ScanEvent from '@/models/ScanEvent';
+import ScanEvent, { parseDeviceType } from '@/models/ScanEvent';
 
 interface Props {
   params: { publicId: string };
@@ -27,6 +27,7 @@ export default async function ScanPage({ params }: Props) {
     scannedAt: new Date(),
     userAgent: headersList.get('user-agent') ?? undefined,
     referer: headersList.get('referer') ?? undefined,
+    deviceType: parseDeviceType(headersList.get('user-agent') ?? undefined),
   }).catch((err: unknown) => console.error('[scan]', err));
 
   // URL type: transparent one-step redirect straight to the destination

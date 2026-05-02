@@ -2,56 +2,120 @@ import mongoose, { Document, Model, Schema } from 'mongoose';
 
 export type QrType = 'URL' | 'TEXT' | 'EMAIL' | 'PHONE';
 
+export type DotStyle =
+  | 'square'
+  | 'rounded'
+  | 'dots'
+  | 'classy'
+  | 'classy-rounded'
+  | 'extra-rounded';
+
+export type CornerSquareStyle = 'none' | 'dot' | 'square' | 'extra-rounded';
+export type CornerDotStyle = 'none' | 'dot' | 'square';
+export type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H';
+
+export interface IEditHistoryEntry {
+  editedAt: Date;
+  previousContent: string;
+  previousLabel?: string;
+  note?: string;
+}
+
 export interface IQrCodeDocument extends Document {
+  // Core
   publicId: string;
   type: QrType;
   content: string;
   label?: string;
-  foreground: string;
-  background: string;
-  size: number;
   scanCount: number;
   createdAt: Date;
   updatedAt: Date;
+
+  // Basic customization
+  foreground: string;
+  background: string;
+  size: number;
+
+  // Advanced customization
+  dotStyle: DotStyle;
+  cornerSquareStyle: CornerSquareStyle;
+  cornerDotStyle: CornerDotStyle;
+  logo?: string;
+  logoSize: number;
+  logoBackgroundColor: string;
+  margin: number;
+  errorCorrectionLevel: ErrorCorrectionLevel;
+
+  // Edit tracking
+  editHistory: IEditHistoryEntry[];
+  lastEditedAt?: Date;
+
+  // Reset / versioning
+  isReset: boolean;
+  resetAt?: Date;
 }
+
+const EditHistorySchema = new Schema<IEditHistoryEntry>(
+  {
+    editedAt: { type: Date, default: Date.now },
+    previousContent: { type: String, required: true },
+    previousLabel: { type: String },
+    note: { type: String },
+  },
+  { _id: false }
+);
 
 const QrCodeSchema = new Schema<IQrCodeDocument>(
   {
-    publicId: {
-      type: String,
-      required: true,
-      unique: true,
-      index: true,
-    },
+    // ── Core ─────────────────────────────────────────────────────────────────
+    publicId: { type: String, required: true, unique: true, index: true },
     type: {
       type: String,
       enum: ['URL', 'TEXT', 'EMAIL', 'PHONE'] as QrType[],
       required: true,
     },
-    content: {
+    content: { type: String, required: true },
+    label: { type: String },
+    scanCount: { type: Number, default: 0, index: true },
+
+    // ── Basic customization ───────────────────────────────────────────────────
+    foreground: { type: String, default: '#000000' },
+    background: { type: String, default: '#FFFFFF' },
+    size: { type: Number, default: 256 },
+
+    // ── Advanced customization ────────────────────────────────────────────────
+    dotStyle: {
       type: String,
-      required: true,
+      enum: ['square', 'rounded', 'dots', 'classy', 'classy-rounded', 'extra-rounded'],
+      default: 'square',
     },
-    label: {
+    cornerSquareStyle: {
       type: String,
+      enum: ['none', 'dot', 'square', 'extra-rounded'],
+      default: 'square',
     },
-    foreground: {
+    cornerDotStyle: {
       type: String,
-      default: '#000000',
+      enum: ['none', 'dot', 'square'],
+      default: 'square',
     },
-    background: {
+    logo: { type: String },
+    logoSize: { type: Number, default: 20 },
+    logoBackgroundColor: { type: String, default: '#FFFFFF' },
+    margin: { type: Number, default: 4 },
+    errorCorrectionLevel: {
       type: String,
-      default: '#FFFFFF',
+      enum: ['L', 'M', 'Q', 'H'],
+      default: 'M',
     },
-    size: {
-      type: Number,
-      default: 256,
-    },
-    scanCount: {
-      type: Number,
-      default: 0,
-      index: true,
-    },
+
+    // ── Edit tracking ─────────────────────────────────────────────────────────
+    editHistory: { type: [EditHistorySchema], default: [] },
+    lastEditedAt: { type: Date },
+
+    // ── Reset / versioning ────────────────────────────────────────────────────
+    isReset: { type: Boolean, default: false },
+    resetAt: { type: Date },
   },
   {
     timestamps: true,
@@ -59,7 +123,6 @@ const QrCodeSchema = new Schema<IQrCodeDocument>(
   }
 );
 
-// Compound index for dashboard queries (sorted by newest first)
 QrCodeSchema.index({ createdAt: -1 });
 
 const QrCode: Model<IQrCodeDocument> =

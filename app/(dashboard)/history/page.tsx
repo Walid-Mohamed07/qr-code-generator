@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getQrList } from '@/lib/actions/qr';
 import HistoryTable from '@/components/history/HistoryTable';
 import Pagination from '@/components/history/Pagination';
+import EditedBanner from '@/components/history/EditedBanner';
 
 export const metadata: Metadata = {
   title: 'History',
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 const PAGE_SIZE = 10;
 
 interface HistoryPageProps {
-  searchParams: { page?: string };
+  searchParams: { page?: string; edited?: string };
 }
 
 export default async function HistoryPage({ searchParams }: HistoryPageProps) {
@@ -22,6 +23,9 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
 
   return (
     <div>
+      {/* Edited success banner */}
+      {searchParams.edited === 'true' && <EditedBanner />}
+
       {/* Page header */}
       <div className="mb-8 flex items-center justify-between gap-4 flex-wrap">
         <div>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongoose';
 import QrCode from '@/models/QrCode';
-import ScanEvent from '@/models/ScanEvent';
+import ScanEvent, { parseDeviceType } from '@/models/ScanEvent';
 
 interface RouteContext {
   params: { publicId: string };
@@ -40,6 +40,7 @@ export async function GET(
       scannedAt: new Date(),
       userAgent: request.headers.get('user-agent') ?? undefined,
       referer: request.headers.get('referer') ?? undefined,
+      deviceType: parseDeviceType(request.headers.get('user-agent') ?? undefined),
     }).catch((err: unknown) => {
       console.error('[scan] Failed to write ScanEvent:', err);
     });
