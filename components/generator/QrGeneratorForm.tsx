@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { ChevronDown, ChevronUp, AlertTriangle, X } from 'lucide-react';
 import { useQrStore } from '@/store/qr-store';
 import { createQr, updateQr } from '@/lib/actions/qr';
-import { drawQrToCanvas } from '@/lib/qr-renderer';
+import { generateQrDataUrl } from '@/lib/qr-renderer';
 import type {
   QrType,
   DotStyle,
@@ -307,7 +307,6 @@ export default function QrGeneratorForm({ onSaved }: QrGeneratorFormProps) {
 
   const router = useRouter();
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const generatePreviewRef = useRef<() => Promise<void>>();
   const logoInputRef = useRef<HTMLInputElement>(null);
 
@@ -359,10 +358,8 @@ export default function QrGeneratorForm({ onSaved }: QrGeneratorFormProps) {
     setRenderError(null);
 
     try {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      await drawQrToCanvas(canvas, formState);
-      setPreviewDataUrl(canvas.toDataURL('image/png'));
+      const dataUrl = await generateQrDataUrl(formState);
+      setPreviewDataUrl(dataUrl);
     } catch (err) {
       console.error('[generatePreview]', err);
       setRenderError('Failed to render QR code. Try simplifying the content or styling.');
@@ -457,9 +454,6 @@ export default function QrGeneratorForm({ onSaved }: QrGeneratorFormProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Hidden canvas for QR rendering */}
-      <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
-
       {/* Edit mode banner */}
       {isEditing && (
         <div className="flex items-start justify-between gap-3 rounded-lg border border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-950 px-4 py-3">
@@ -827,6 +821,7 @@ export default function QrGeneratorForm({ onSaved }: QrGeneratorFormProps) {
         <button
           type="button"
           onClick={() => void generatePreview()}
+          suppressHydrationWarning
           className="w-full py-2.5 rounded-md bg-indigo-600 text-white font-medium text-sm hover:bg-indigo-700 active:bg-indigo-800 transition-colors"
         >
           Generate Preview
@@ -835,6 +830,7 @@ export default function QrGeneratorForm({ onSaved }: QrGeneratorFormProps) {
           type="button"
           onClick={() => void handleSave()}
           disabled={isSaving}
+          suppressHydrationWarning
           className="w-full py-2.5 rounded-md border border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400 font-medium text-sm hover:bg-indigo-50 dark:hover:bg-indigo-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSaving ? 'Saving…' : isEditing ? 'Save Changes' : 'Save to History'}
