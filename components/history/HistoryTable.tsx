@@ -1,9 +1,9 @@
-﻿'use client';
+﻿"use client";
 
-import { useState, useTransition } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
+import { useState, useTransition } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import {
   Scan,
   Copy,
@@ -13,17 +13,19 @@ import {
   RotateCcw,
   Loader2,
   QrCode as QrCodeIcon,
-} from 'lucide-react';
-import { deleteQr, resetQr } from '@/lib/actions/qr';
-import { truncate, formatDate } from '@/lib/utils';
-import { useQrStore } from '@/store/qr-store';
-import Badge from '@/components/ui/Badge';
-import ConfirmDialog from '@/components/ui/ConfirmDialog';
-import EmptyState from '@/components/ui/EmptyState';
-import QrThumbnail from '@/components/ui/QrThumbnail';
-import ResetConfirmDialog from '@/components/history/ResetConfirmDialog';
-import QrDetailsModal from '@/components/history/QrDetailsModal';
-import type { IQrCode } from '@/types';
+  Share2,
+} from "lucide-react";
+import { deleteQr, resetQr } from "@/lib/actions/qr";
+import { truncate, formatDate } from "@/lib/utils";
+import { useQrStore } from "@/store/qr-store";
+import Badge from "@/components/ui/Badge";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import EmptyState from "@/components/ui/EmptyState";
+import QrThumbnail from "@/components/ui/QrThumbnail";
+import ResetConfirmDialog from "@/components/history/ResetConfirmDialog";
+import QrDetailsModal from "@/components/history/QrDetailsModal";
+import ShareModal from "@/components/history/ShareModal";
+import type { IQrCode } from "@/types";
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -37,8 +39,8 @@ function copyUrl(publicId: string) {
   const url = `${window.location.origin}/${publicId}`;
   navigator.clipboard
     .writeText(url)
-    .then(() => toast.success('Copied to clipboard'))
-    .catch(() => toast.error('Clipboard access denied'));
+    .then(() => toast.success("Copied to clipboard"))
+    .catch(() => toast.error("Clipboard access denied"));
 }
 
 // ── Dialog target state ───────────────────────────────────────────────────────
@@ -66,6 +68,12 @@ export default function HistoryTable({ items }: HistoryTableProps) {
   const [detailsTargetId, setDetailsTargetId] = useState<string | null>(null);
   const [detailsRefetchKey, setDetailsRefetchKey] = useState(0);
 
+  // Share modal
+  const [shareTarget, setShareTarget] = useState<{
+    url: string;
+    label: string;
+  } | null>(null);
+
   // Edit navigation lock
   const [isNavigatingToEdit, setIsNavigatingToEdit] = useState(false);
 
@@ -76,12 +84,12 @@ export default function HistoryTable({ items }: HistoryTableProps) {
       const result = await deleteQr(id);
       setConfirmTarget(null);
 
-      if ('error' in result && result.error) {
+      if ("error" in result && result.error) {
         toast.error(result.error);
       } else {
         // Clear edit mode if the deleted QR was being edited
         if (editingId === id) setEditMode(null);
-        toast.success('Deleted successfully');
+        toast.success("Deleted successfully");
       }
     });
   };
@@ -93,7 +101,7 @@ export default function HistoryTable({ items }: HistoryTableProps) {
     loadQrForEdit(item);
     setEditMode(item._id);
     toast.success(`Editing: ${item.label ?? truncate(item.content, 25)}`);
-    router.push('/generator');
+    router.push("/generator");
   };
 
   // ── Reset ──────────────────────────────────────────────────────────────────
@@ -104,10 +112,10 @@ export default function HistoryTable({ items }: HistoryTableProps) {
     setResettingId(null);
     setResetTarget(null);
 
-    if ('error' in result && result.error) {
-      toast.error(result.error ?? 'Failed to reset stats.');
+    if ("error" in result && result.error) {
+      toast.error(result.error ?? "Failed to reset stats.");
     } else {
-      toast.success('Stats reset — scan count cleared');
+      toast.success("Stats reset — scan count cleared");
       // If the details modal is open for this QR, trigger a refetch
       if (detailsTargetId === id) {
         setDetailsRefetchKey((k) => k + 1);
@@ -173,6 +181,15 @@ export default function HistoryTable({ items }: HistoryTableProps) {
         />
       )}
 
+      {/* Share modal */}
+      {shareTarget && (
+        <ShareModal
+          url={shareTarget.url}
+          label={shareTarget.label}
+          onClose={() => setShareTarget(null)}
+        />
+      )}
+
       {/* Responsive table */}
       <div className="w-full overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
         <table className="w-full text-sm">
@@ -235,7 +252,7 @@ export default function HistoryTable({ items }: HistoryTableProps) {
                 {/* Label */}
                 <td className="px-4 py-3 hidden md:table-cell">
                   <span className="text-gray-600 dark:text-gray-400">
-                    {item.label ?? '—'}
+                    {item.label ?? "—"}
                   </span>
                 </td>
 
@@ -255,7 +272,6 @@ export default function HistoryTable({ items }: HistoryTableProps) {
                 {/* Actions */}
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-0.5 justify-end">
-
                     {/* Copy URL */}
                     <button
                       type="button"
@@ -265,6 +281,22 @@ export default function HistoryTable({ items }: HistoryTableProps) {
                       className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       <Copy className="w-4 h-4" />
+                    </button>
+
+                    {/* Share */}
+                    <button
+                      type="button"
+                      title="Share QR code"
+                      disabled={isNavigatingToEdit || resettingId === item._id}
+                      onClick={() =>
+                        setShareTarget({
+                          url: `${window.location.origin}/${item.publicId}`,
+                          label: item.label ?? truncate(item.content, 40),
+                        })
+                      }
+                      className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <Share2 className="w-4 h-4" />
                     </button>
 
                     {/* Details */}
@@ -296,7 +328,9 @@ export default function HistoryTable({ items }: HistoryTableProps) {
                       disabled={isNavigatingToEdit || resettingId === item._id}
                       onClick={() => {
                         if (item.scanCount === 0) {
-                          toast('Nothing to reset — no scans recorded', { icon: '⚠️' });
+                          toast("Nothing to reset — no scans recorded", {
+                            icon: "⚠️",
+                          });
                           return;
                         }
                         setResetTarget({
@@ -328,7 +362,6 @@ export default function HistoryTable({ items }: HistoryTableProps) {
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
-
                   </div>
                 </td>
               </tr>

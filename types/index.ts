@@ -88,6 +88,7 @@ export interface IQrDetails {
     scannedAt: string;
     deviceType: DeviceType;
     referer?: string;
+    ip?: string;
   }[];
   editHistory: IEditHistoryEntry[];
 }

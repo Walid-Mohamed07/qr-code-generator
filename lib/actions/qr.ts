@@ -402,7 +402,7 @@ export async function getQrDetails(
       ScanEvent.find({ qrId: objectId })
         .sort({ scannedAt: -1 })
         .limit(10)
-        .select('scannedAt deviceType referer')
+        .select('scannedAt deviceType referer ip')
         .lean(),
     ]);
 
@@ -427,6 +427,7 @@ export async function getQrDetails(
             : String(scan.scannedAt),
         deviceType: (scan.deviceType as DeviceType) ?? 'unknown',
         referer: scan.referer as string | undefined,
+        ip: scan.ip as string | undefined,
       };
     }),
     editHistory: serialiseEditHistory(

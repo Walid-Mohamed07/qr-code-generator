@@ -437,6 +437,9 @@ export default function QrDetailsModal({ qrId, onClose, refetchKey }: QrDetailsM
                           <th className="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">
                             Device
                           </th>
+                          <th className="text-left py-2 pr-4 font-medium text-gray-500 dark:text-gray-400">
+                            IP
+                          </th>
                           <th className="text-left py-2 font-medium text-gray-500 dark:text-gray-400">
                             Referer
                           </th>
@@ -454,9 +457,12 @@ export default function QrDetailsModal({ qrId, onClose, refetchKey }: QrDetailsM
                             <td className="py-2 pr-4">
                               <span className="capitalize">{scan.deviceType}</span>
                             </td>
-                            <td className="py-2 text-xs font-mono text-gray-500 dark:text-gray-400 max-w-[240px] truncate">
+                            <td className="py-2 pr-4 text-xs font-mono text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                              {scan.ip ?? '—'}
+                            </td>
+                            <td className="py-2 text-xs font-mono text-gray-500 dark:text-gray-400 max-w-[200px] truncate">
                               {scan.referer
-                                ? truncate(scan.referer, 50)
+                                ? truncate(scan.referer, 40)
                                 : '—'}
                             </td>
                           </tr>

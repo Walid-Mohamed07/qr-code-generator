@@ -40,6 +40,10 @@ export async function GET(
       scannedAt: new Date(),
       userAgent: request.headers.get('user-agent') ?? undefined,
       referer: request.headers.get('referer') ?? undefined,
+      ip:
+        request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+        request.headers.get('x-real-ip') ??
+        undefined,
       deviceType: parseDeviceType(request.headers.get('user-agent') ?? undefined),
     }).catch((err: unknown) => {
       console.error('[scan] Failed to write ScanEvent:', err);

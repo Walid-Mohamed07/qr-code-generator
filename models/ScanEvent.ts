@@ -19,6 +19,7 @@ export interface IScanEventDocument extends Document {
   scannedAt: Date;
   userAgent?: string;
   referer?: string;
+  ip?: string;
   deviceType: DeviceType;
   city?: string;
   country?: string;
@@ -39,6 +40,7 @@ const ScanEventSchema = new Schema<IScanEventDocument>(
     },
     userAgent: { type: String },
     referer: { type: String },
+    ip: { type: String },
     deviceType: {
       type: String,
       enum: ['mobile', 'desktop', 'tablet', 'unknown'],
