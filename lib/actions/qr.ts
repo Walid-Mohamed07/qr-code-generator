@@ -2,7 +2,9 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { nanoid } from 'nanoid';
+import { customAlphabet } from 'nanoid';
+
+const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 12);
 import mongoose from 'mongoose';
 import { connectDB } from '@/lib/mongoose';
 import QrCode from '@/models/QrCode';
@@ -81,7 +83,7 @@ export async function createQr(
     await connectDB();
 
     const qr = await QrCode.create({
-      publicId: nanoid(10),
+      publicId: nanoid(),
       type,
       content,
       label,
