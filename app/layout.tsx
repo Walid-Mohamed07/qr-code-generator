@@ -1,21 +1,21 @@
-import type { Metadata } from 'next';
-import type { ReactNode } from 'react';
-import { Inter } from 'next/font/google';
-import { ThemeProvider } from 'next-themes';
-import { Toaster } from 'react-hot-toast';
-import './globals.css';
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import { Inter } from "next/font/google";
+import { ThemeProvider } from "next-themes";
+import { Toaster } from "react-hot-toast";
+import "./globals.css";
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
   title: {
-    default: 'QR Studio',
-    template: '%s | QR Studio',
+    default: "QR Studio",
+    template: "%s | QR Studio",
   },
   description:
-    'Generate, manage, and track QR codes for URLs, text, emails, and phone numbers.',
+    "Generate, manage, and track QR codes for URLs, text, emails, and phone numbers.",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://myqrcode-opal.vercel.app",
   ),
 };
 
@@ -25,11 +25,7 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={inter.variable}
-    >
+    <html lang="en" suppressHydrationWarning className={inter.variable}>
       <body className="font-sans antialiased">
         {/*
           ThemeProvider must wrap everything so next-themes can inject
@@ -57,7 +53,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             toastOptions={{
               duration: 3500,
               style: {
-                fontSize: '0.875rem',
+                fontSize: "0.875rem",
               },
             }}
           />

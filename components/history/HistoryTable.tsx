@@ -22,7 +22,7 @@ interface HistoryTableProps {
 // ── Row actions ───────────────────────────────────────────────────────────────
 
 function copyUrl(publicId: string) {
-  const url = `${window.location.origin}/s/${publicId}`;
+  const url = `${window.location.origin}/${publicId}`;
   navigator.clipboard
     .writeText(url)
     .then(() => toast.success('Copied to clipboard'))
@@ -33,7 +33,7 @@ async function downloadPng(item: IQrCode) {
   try {
     // Encode the scan tracking URL so scanning the downloaded QR
     // routes through /api/scan/[publicId] and increments the count.
-    const scanUrl = `${window.location.origin}/s/${item.publicId}`;
+    const scanUrl = `${window.location.origin}/${item.publicId}`;
     const dataUrl = await QRCode.toDataURL(scanUrl, {
       width: item.size,
       color: { dark: item.foreground, light: item.background },

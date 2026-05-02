@@ -16,19 +16,19 @@ A production-ready QR Code Generator with a real-time monitoring dashboard, buil
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 14 (App Router) |
-| Language | TypeScript (strict) |
-| Styling | Tailwind CSS |
-| State | Zustand |
-| Database | MongoDB + Mongoose |
-| QR generation | `qrcode` |
-| Charts | Recharts |
-| Validation | Zod |
-| Notifications | react-hot-toast |
-| Icons | lucide-react |
-| Dark mode | next-themes |
+| Layer         | Technology              |
+| ------------- | ----------------------- |
+| Framework     | Next.js 14 (App Router) |
+| Language      | TypeScript (strict)     |
+| Styling       | Tailwind CSS            |
+| State         | Zustand                 |
+| Database      | MongoDB + Mongoose      |
+| QR generation | `qrcode`                |
+| Charts        | Recharts                |
+| Validation    | Zod                     |
+| Notifications | react-hot-toast         |
+| Icons         | lucide-react            |
+| Dark mode     | next-themes             |
 
 ---
 
@@ -84,7 +84,7 @@ npm install
 ### 2. Configure environment variables
 
 ```bash
-cp .env.example .env.local
+cp .env.local .env.example
 ```
 
 Open `.env.local` and fill in:
@@ -95,6 +95,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 **Getting a MongoDB URI:**
+
 1. Create a free cluster at [MongoDB Atlas](https://cloud.mongodb.com)
 2. Go to **Connect → Drivers → Node.js**
 3. Copy the connection string and replace `<password>` with your DB user's password
@@ -127,11 +128,11 @@ Open [http://localhost:3000](http://localhost:3000) — you'll be redirected to 
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `MONGODB_URI` | ✅ Yes | MongoDB connection string |
-| `NEXT_PUBLIC_APP_URL` | ✅ Yes | Public base URL (no trailing slash) |
-| `NEXTAUTH_SECRET` | No | Reserved for future auth integration |
+| Variable              | Required | Description                          |
+| --------------------- | -------- | ------------------------------------ |
+| `MONGODB_URI`         | ✅ Yes   | MongoDB connection string            |
+| `NEXT_PUBLIC_APP_URL` | ✅ Yes   | Public base URL (no trailing slash)  |
+| `NEXTAUTH_SECRET`     | No       | Reserved for future auth integration |
 
 ---
 
@@ -168,11 +169,11 @@ The dashboard aggregates `scanCount` values across all documents — no need to 
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Production build |
-| `npm run start` | Start production server |
-| `npm run lint` | ESLint check |
-| `npm run seed` | Insert 10 sample QR codes |
-| `npx ts-node --project tsconfig.scripts.json scripts/createIndexes.ts` | Create MongoDB indexes |
+| Command                                                                | Description               |
+| ---------------------------------------------------------------------- | ------------------------- |
+| `npm run dev`                                                          | Start development server  |
+| `npm run build`                                                        | Production build          |
+| `npm run start`                                                        | Start production server   |
+| `npm run lint`                                                         | ESLint check              |
+| `npm run seed`                                                         | Insert 10 sample QR codes |
+| `npx ts-node --project tsconfig.scripts.json scripts/createIndexes.ts` | Create MongoDB indexes    |

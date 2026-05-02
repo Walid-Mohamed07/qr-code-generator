@@ -24,7 +24,7 @@ export default function QrPreviewPanel({ savedPublicId }: QrPreviewPanelProps) {
   const [savedQrDataUrl, setSavedQrDataUrl] = useState<string | null>(null);
 
   const scanUrl = savedPublicId
-    ? `${window.location.origin}/s/${savedPublicId}`
+    ? `${window.location.origin}/${savedPublicId}`
     : null;
 
   useEffect(() => {
