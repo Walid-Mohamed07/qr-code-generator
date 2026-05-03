@@ -1,12 +1,65 @@
 import { redirect, notFound } from 'next/navigation';
 import { headers } from 'next/headers';
+import type { Metadata } from 'next';
 import { Mail, Phone, FileText, ExternalLink } from 'lucide-react';
 import { connectDB } from '@/lib/mongoose';
 import QrCode from '@/models/QrCode';
 import ScanEvent, { parseDeviceType } from '@/models/ScanEvent';
+import type { QrType } from '@/types';
 
 interface Props {
   params: { publicId: string };
+}
+
+// ── Dynamic metadata for social sharing ──────────────────────────────────────
+
+function buildDescription(type: QrType, content: string): string {
+  switch (type) {
+    case 'URL':   return `Scan this QR code to visit: ${content}`;
+    case 'EMAIL': return `Scan this QR code to send an email to ${content}`;
+    case 'PHONE': return `Scan this QR code to call ${content}`;
+    case 'TEXT':  return 'Scan this QR code to read the message';
+  }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  await connectDB();
+
+  const qr = await QrCode.findOne({ publicId: params.publicId })
+    .select('type content label')
+    .lean();
+
+  if (!qr) return { title: 'QR Code Not Found | QR Studio' };
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://myqrcode-opal.vercel.app';
+  const ogImageUrl = `${appUrl}/api/og/${params.publicId}`;
+  const pageUrl    = `${appUrl}/${params.publicId}`;
+
+  const title =
+    qr.label
+      ? `${qr.label} — QR Studio`
+      : `${qr.type} QR Code — QR Studio`;
+
+  const description = buildDescription(qr.type, qr.content);
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: pageUrl,
+      siteName: 'QR Studio',
+      type: 'website',
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImageUrl],
+    },
+  };
 }
 
 export default async function ScanPage({ params }: Props) {
