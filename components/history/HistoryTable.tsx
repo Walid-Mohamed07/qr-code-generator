@@ -14,8 +14,10 @@ import {
   Loader2,
   QrCode as QrCodeIcon,
   Share2,
+  Download,
 } from "lucide-react";
 import { deleteQr, resetQr } from "@/lib/actions/qr";
+import { generateQrDataUrl } from "@/lib/qr-renderer";
 import { truncate, formatDate } from "@/lib/utils";
 import { useQrStore } from "@/store/qr-store";
 import Badge from "@/components/ui/Badge";
@@ -77,6 +79,9 @@ export default function HistoryTable({ items }: HistoryTableProps) {
   // Edit navigation lock
   const [isNavigatingToEdit, setIsNavigatingToEdit] = useState(false);
 
+  // Download loading state (keyed by QR _id)
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
   // ── Delete ─────────────────────────────────────────────────────────────────
 
   const handleDelete = (id: string) => {
@@ -102,6 +107,36 @@ export default function HistoryTable({ items }: HistoryTableProps) {
     setEditMode(item._id);
     toast.success(`Editing: ${item.label ?? truncate(item.content, 25)}`);
     router.push("/generator");
+  };
+
+  // ── Download ────────────────────────────────────────────────────────────────
+
+  const handleDownload = async (item: IQrCode) => {
+    setDownloadingId(item._id);
+    try {
+      const dataUrl = await generateQrDataUrl({
+        content: item.content,
+        size: 512,
+        foreground: item.foreground,
+        background: item.background,
+        dotStyle: item.dotStyle,
+        cornerSquareStyle: item.cornerSquareStyle,
+        cornerDotStyle: item.cornerDotStyle,
+        logo: item.logo,
+        logoSize: item.logoSize,
+        logoBackgroundColor: item.logoBackgroundColor,
+        margin: item.margin,
+        errorCorrectionLevel: item.errorCorrectionLevel,
+      });
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `${item.label ?? item.publicId}.png`;
+      a.click();
+    } catch {
+      toast.error('Failed to download QR code');
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   // ── Reset ──────────────────────────────────────────────────────────────────
@@ -272,6 +307,21 @@ export default function HistoryTable({ items }: HistoryTableProps) {
                 {/* Actions */}
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-0.5 justify-end">
+                    {/* Download */}
+                    <button
+                      type="button"
+                      title="Download QR code"
+                      disabled={isNavigatingToEdit || resettingId === item._id || downloadingId === item._id}
+                      onClick={() => void handleDownload(item)}
+                      className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      {downloadingId === item._id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4" />
+                      )}
+                    </button>
+
                     {/* Copy URL */}
                     <button
                       type="button"
