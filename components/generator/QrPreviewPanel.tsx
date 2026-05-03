@@ -140,13 +140,16 @@ export default function QrPreviewPanel({ savedPublicId }: QrPreviewPanelProps) {
         {!isGenerating && !hasPreview && (
           <div className="flex flex-col items-center gap-3 text-gray-400 p-8 text-center">
             <QrCodeIcon className="w-16 h-16 opacity-25" />
-            <p className="text-sm font-medium">No preview yet</p>
-            <p className="text-xs leading-relaxed">
-              Enter content and click{' '}
-              <span className="font-semibold">Generate Preview</span>,
-              <br />
-              or wait 400ms for auto-generation.
-            </p>
+            {formState.content.trim() ? (
+              <>
+                <p className="text-sm font-medium">No preview yet</p>
+                <p className="text-xs leading-relaxed">
+                  Wait 400ms for auto-generation.
+                </p>
+              </>
+            ) : (
+              <p className="text-sm font-medium">Enter content to preview QR</p>
+            )}
           </div>
         )}
       </div>

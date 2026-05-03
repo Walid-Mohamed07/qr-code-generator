@@ -1,80 +1,127 @@
-// ─────────────────────────────────────────────
+﻿// ─────────────────────────────────────────────────────────────────────────────
 // Shared TypeScript interfaces for the QR Generator app
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Enums / unions ────────────────────────────────────────────────────────────
 
 /** The four supported QR content types */
-export type QrType = 'URL' | 'TEXT' | 'EMAIL' | 'PHONE';
+export type QrType = "URL" | "TEXT" | "EMAIL" | "PHONE";
+
+export type DotStyle =
+  | "square"
+  | "rounded"
+  | "dots"
+  | "classy"
+  | "classy-rounded"
+  | "extra-rounded";
+
+export type CornerSquareStyle = "none" | "dot" | "square" | "extra-rounded";
+export type CornerDotStyle = "none" | "dot" | "square";
+export type ErrorCorrectionLevel = "L" | "M" | "Q" | "H";
+export type DeviceType = "mobile" | "desktop" | "tablet" | "unknown";
+
+// ── QR Customization ──────────────────────────────────────────────────────────
+
+export interface IQrCustomization {
+  size: number;
+  foreground: string;
+  background: string;
+  dotStyle: DotStyle;
+  cornerSquareStyle: CornerSquareStyle;
+  cornerDotStyle: CornerDotStyle;
+  logo?: string;
+  logoSize: number;
+  logoBackgroundColor: string;
+  margin: number;
+  errorCorrectionLevel: ErrorCorrectionLevel;
+}
+
+// ── Edit history ──────────────────────────────────────────────────────────────
+
+export interface IEditHistoryEntry {
+  editedAt: string; // ISO string after serialisation
+  previousContent: string;
+  previousLabel?: string;
+  note?: string;
+}
+
+// ── Core QR code record ───────────────────────────────────────────────────────
 
 /**
  * Plain-object representation of a QrCode document
  * (returned from the DB layer after serialisation).
- * _id is a string because Mongoose ObjectIds are serialised
- * to strings when passed from Server Components to Client Components.
  */
-export interface IQrCode {
+export interface IQrCode extends IQrCustomization {
   _id: string;
   publicId: string;
   type: QrType;
   content: string;
   label?: string;
-  foreground: string;
-  background: string;
-  size: number;
   scanCount: number;
-  createdAt: string; // ISO 8601 string after JSON serialisation
+  createdAt: string;
   updatedAt: string;
+  editHistory: IEditHistoryEntry[];
+  lastEditedAt?: string;
+  isReset: boolean;
+  resetAt?: string;
 }
 
+// ── Form state ────────────────────────────────────────────────────────────────
+
 /**
- * The shape of the QR generator form.
- * Used by Zustand store and Server Actions.
+ * Shape of the QR generator form — extends customization with
+ * content fields. Used by Zustand store and Server Actions.
  */
-export interface IQrFormState {
+export interface IQrFormState extends IQrCustomization {
   type: QrType;
   content: string;
   label: string;
-  foreground: string;
-  background: string;
-  size: number;
 }
 
-/**
- * Per-type breakdown entry used in dashboard charts.
- */
+// ── QR detail page ────────────────────────────────────────────────────────────
+
+export interface IQrDetails {
+  qr: IQrCode;
+  scanTimeline: { date: string; count: number }[];
+  deviceBreakdown: { device: string; count: number }[];
+  recentScans: {
+    scannedAt: string;
+    deviceType: DeviceType;
+    referer?: string;
+    ip?: string;
+  }[];
+  editHistory: IEditHistoryEntry[];
+}
+
+// ── Dashboard aggregates ──────────────────────────────────────────────────────
+
 export interface IQrTypeBreakdown {
   type: QrType;
   count: number;
 }
 
-/**
- * Per-day entry for the "QRs generated over time" chart.
- */
 export interface IQrOverTimeEntry {
   date: string; // "YYYY-MM-DD"
   count: number;
 }
 
-/**
- * Aggregated stats returned by getQrStats() for the dashboard.
- */
 export interface IQrStats {
   totalQrs: number;
   totalScans: number;
+  editedCount: number;
+  resetCount: number;
   qrsByType: IQrTypeBreakdown[];
   qrOverTime: IQrOverTimeEntry[];
+  deviceBreakdown: { device: string; count: number }[];
+  recentlyEdited: IQrCode[];
 }
 
-/**
- * Generic API response wrapper.
- * Either `data` or `error` will be present, never both.
- */
+// ── API / pagination ──────────────────────────────────────────────────────────
+
 export type ApiResponse<T> =
   | { data: T; error?: never }
   | { error: string; data?: never };
 
-/**
- * Paginated list response from getQrList().
- */
 export interface IPaginatedQrList {
   data: IQrCode[];
   total: number;

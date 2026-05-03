@@ -1,52 +1,98 @@
 'use client';
 
-import { useEffect, useRef, memo } from 'react';
-import QRCode from 'qrcode';
+import { useEffect, useState, useMemo, memo } from 'react';
+import { generateQrDataUrl } from '@/lib/qr-renderer';
+import type { IQrCustomization } from '@/types';
 
-interface QrThumbnailProps {
+/**
+ * All IQrCustomization fields are optional here so callers can pass only the
+ * fields they have (e.g. the history table only passes foreground/background).
+ * Missing fields are filled with the same defaults used by the store.
+ */
+interface QrThumbnailProps extends Partial<IQrCustomization> {
   content: string;
-  foreground?: string;
-  background?: string;
-  /** Rendered canvas size in px. Defaults to 48. */
+  /** Display size in px. Defaults to 48. QR is rendered at 128 px for crispness. */
   size?: number;
 }
 
-/**
- * Renders a small QR code canvas from the given content string.
- * Memoised so re-renders of parent list rows don't re-draw the canvas
- * unless the content or colour props actually change.
- */
 const QrThumbnail = memo(function QrThumbnail({
   content,
+  size = 48,
   foreground = '#000000',
   background = '#FFFFFF',
-  size = 48,
+  dotStyle = 'square',
+  cornerSquareStyle = 'square',
+  cornerDotStyle = 'square',
+  logo,
+  logoSize = 20,
+  logoBackgroundColor = '#FFFFFF',
+  margin = 4,
+  errorCorrectionLevel = 'M',
 }: QrThumbnailProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+
+  // Build a stable opts object; rendered at 128 px for crispness regardless of display size
+  const opts = useMemo(
+    () => ({
+      content,
+      size: 128,
+      foreground,
+      background,
+      dotStyle,
+      cornerSquareStyle,
+      cornerDotStyle,
+      logo,
+      logoSize,
+      logoBackgroundColor,
+      margin,
+      errorCorrectionLevel,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      content,
+      foreground,
+      background,
+      dotStyle,
+      cornerSquareStyle,
+      cornerDotStyle,
+      logo,
+      logoSize,
+      logoBackgroundColor,
+      margin,
+      errorCorrectionLevel,
+    ]
+  );
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !content.trim()) return;
+    if (!content.trim()) return;
+    let cancelled = false;
+    generateQrDataUrl(opts)
+      .then((url) => { if (!cancelled) setDataUrl(url); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [opts, content]);
 
-    QRCode.toCanvas(canvas, content, {
-      width: size,
-      color: { dark: foreground, light: background },
-      margin: 1,
-      errorCorrectionLevel: 'L', // Low correction = denser, more compact at small sizes
-    }).catch((err) => {
-      console.error('[QrThumbnail]', err);
-    });
-  }, [content, foreground, background, size]);
+  if (!dataUrl) {
+    return (
+      <div
+        style={{ width: size, height: size }}
+        className="rounded shrink-0 bg-gray-100 dark:bg-gray-700 animate-pulse"
+        aria-label="QR code thumbnail loading"
+      />
+    );
+  }
 
   return (
-    <canvas
-      ref={canvasRef}
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={dataUrl}
+      alt="QR code thumbnail"
       width={size}
       height={size}
       className="rounded shrink-0"
-      aria-label="QR code thumbnail"
     />
   );
 });
 
 export default QrThumbnail;
+

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import { Menu, Sun, Moon } from 'lucide-react';
 import MobileDrawer from '@/components/layout/MobileDrawer';
@@ -13,7 +13,10 @@ import MobileDrawer from '@/components/layout/MobileDrawer';
  */
 export default function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { resolvedTheme, setTheme } = useTheme();
+
+  useEffect(() => setMounted(true), []);
 
   const toggleTheme = () => {
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
@@ -28,6 +31,7 @@ export default function Header() {
           onClick={() => setDrawerOpen(true)}
           className="lg:hidden p-1.5 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           aria-label="Open navigation menu"
+          suppressHydrationWarning
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -43,8 +47,12 @@ export default function Header() {
             resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
           }
           className="p-1.5 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          suppressHydrationWarning
         >
-          {resolvedTheme === 'dark' ? (
+          {/* Render a placeholder until client mounts to avoid SSR/client icon mismatch */}
+          {!mounted ? (
+            <span className="w-5 h-5 block" />
+          ) : resolvedTheme === 'dark' ? (
             <Sun className="w-5 h-5" />
           ) : (
             <Moon className="w-5 h-5" />

@@ -1,10 +1,28 @@
 import mongoose, { Document, Model, Schema, Types } from 'mongoose';
 
+export type DeviceType = 'mobile' | 'desktop' | 'tablet' | 'unknown';
+
+/**
+ * Parse a User-Agent string into a broad device category.
+ * Order matters: check tablet before mobile (some tablet UAs contain both).
+ */
+export function parseDeviceType(userAgent?: string): DeviceType {
+  if (!userAgent) return 'unknown';
+  if (/tablet/i.test(userAgent)) return 'tablet';
+  if (/mobile/i.test(userAgent)) return 'mobile';
+  if (/windows|macintosh|linux/i.test(userAgent)) return 'desktop';
+  return 'unknown';
+}
+
 export interface IScanEventDocument extends Document {
   qrId: Types.ObjectId;
   scannedAt: Date;
   userAgent?: string;
   referer?: string;
+  ip?: string;
+  deviceType: DeviceType;
+  city?: string;
+  country?: string;
 }
 
 const ScanEventSchema = new Schema<IScanEventDocument>(
@@ -20,19 +38,25 @@ const ScanEventSchema = new Schema<IScanEventDocument>(
       default: Date.now,
       index: true,
     },
-    userAgent: {
+    userAgent: { type: String },
+    referer: { type: String },
+    ip: { type: String },
+    deviceType: {
       type: String,
+      enum: ['mobile', 'desktop', 'tablet', 'unknown'],
+      default: 'unknown',
     },
-    referer: {
-      type: String,
-    },
+    city: { type: String },
+    country: { type: String },
   },
   {
-    // No timestamps — scannedAt IS the timestamp; avoids redundant updatedAt
     timestamps: false,
     collection: 'scanevents',
   }
 );
+
+// Compound index for per-QR timeline queries
+ScanEventSchema.index({ qrId: 1, scannedAt: -1 });
 
 const ScanEvent: Model<IScanEventDocument> =
   mongoose.models.ScanEvent ??
