@@ -17,7 +17,7 @@ import {
   Download,
 } from "lucide-react";
 import { deleteQr, resetQr } from "@/lib/actions/qr";
-import { generateQrDataUrl } from "@/lib/qr-renderer";
+import { drawQrToCanvas } from "@/lib/qr-renderer";
 import { truncate, formatDate } from "@/lib/utils";
 import { useQrStore } from "@/store/qr-store";
 import Badge from "@/components/ui/Badge";
@@ -114,7 +114,8 @@ export default function HistoryTable({ items }: HistoryTableProps) {
   const handleDownload = async (item: IQrCode) => {
     setDownloadingId(item._id);
     try {
-      const dataUrl = await generateQrDataUrl({
+      const canvas = document.createElement('canvas');
+      await drawQrToCanvas(canvas, {
         content: item.content,
         size: 512,
         foreground: item.foreground,
@@ -129,7 +130,7 @@ export default function HistoryTable({ items }: HistoryTableProps) {
         errorCorrectionLevel: item.errorCorrectionLevel,
       });
       const a = document.createElement('a');
-      a.href = dataUrl;
+      a.href = canvas.toDataURL('image/png');
       a.download = `${item.label ?? item.publicId}.png`;
       a.click();
     } catch {
