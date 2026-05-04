@@ -1,18 +1,18 @@
-import mongoose, { Document, Model, Schema } from 'mongoose';
+import mongoose, { Document, Model, Schema } from "mongoose";
 
-export type QrType = 'URL' | 'TEXT' | 'EMAIL' | 'PHONE';
+export type QrType = "URL" | "TEXT" | "EMAIL" | "PHONE";
 
 export type DotStyle =
-  | 'square'
-  | 'rounded'
-  | 'dots'
-  | 'classy'
-  | 'classy-rounded'
-  | 'extra-rounded';
+  | "square"
+  | "rounded"
+  | "dots"
+  | "classy"
+  | "classy-rounded"
+  | "extra-rounded";
 
-export type CornerSquareStyle = 'none' | 'dot' | 'square' | 'extra-rounded';
-export type CornerDotStyle = 'none' | 'dot' | 'square';
-export type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H';
+export type CornerSquareStyle = "none" | "dot" | "square" | "extra-rounded";
+export type CornerDotStyle = "none" | "dot" | "square";
+export type ErrorCorrectionLevel = "L" | "M" | "Q" | "H";
 
 export interface IEditHistoryEntry {
   editedAt: Date;
@@ -49,6 +49,7 @@ export interface IQrCodeDocument extends Document {
   errorCorrectionLevel: ErrorCorrectionLevel;
   borderWidth: number;
   borderColor: string;
+  borderPadding: number;
 
   // Edit tracking
   editHistory: IEditHistoryEntry[];
@@ -66,7 +67,7 @@ const EditHistorySchema = new Schema<IEditHistoryEntry>(
     previousLabel: { type: String },
     note: { type: String },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const QrCodeSchema = new Schema<IQrCodeDocument>(
@@ -75,7 +76,7 @@ const QrCodeSchema = new Schema<IQrCodeDocument>(
     publicId: { type: String, required: true, unique: true, index: true },
     type: {
       type: String,
-      enum: ['URL', 'TEXT', 'EMAIL', 'PHONE'] as QrType[],
+      enum: ["URL", "TEXT", "EMAIL", "PHONE"] as QrType[],
       required: true,
     },
     content: { type: String, required: true },
@@ -83,39 +84,47 @@ const QrCodeSchema = new Schema<IQrCodeDocument>(
     scanCount: { type: Number, default: 0, index: true },
 
     // ── Basic customization ───────────────────────────────────────────────────
-    foreground: { type: String, default: '#000000' },
-    background: { type: String, default: '#FFFFFF' },
+    foreground: { type: String, default: "#000000" },
+    background: { type: String, default: "#FFFFFF" },
     size: { type: Number, default: 256 },
 
     // ── Advanced customization ────────────────────────────────────────────────
     dotStyle: {
       type: String,
-      enum: ['square', 'rounded', 'dots', 'classy', 'classy-rounded', 'extra-rounded'],
-      default: 'square',
+      enum: [
+        "square",
+        "rounded",
+        "dots",
+        "classy",
+        "classy-rounded",
+        "extra-rounded",
+      ],
+      default: "square",
     },
     cornerSquareStyle: {
       type: String,
-      enum: ['none', 'dot', 'square', 'extra-rounded'],
-      default: 'square',
+      enum: ["none", "dot", "square", "extra-rounded"],
+      default: "square",
     },
     cornerDotStyle: {
       type: String,
-      enum: ['none', 'dot', 'square'],
-      default: 'square',
+      enum: ["none", "dot", "square"],
+      default: "square",
     },
-    cornerSquareColor: { type: String, default: '#000000' },
-    cornerDotColor: { type: String, default: '#000000' },
+    cornerSquareColor: { type: String, default: "#000000" },
+    cornerDotColor: { type: String, default: "#000000" },
     logo: { type: String },
     logoSize: { type: Number, default: 20 },
-    logoBackgroundColor: { type: String, default: '#FFFFFF' },
+    logoBackgroundColor: { type: String, default: "#FFFFFF" },
     margin: { type: Number, default: 4 },
     errorCorrectionLevel: {
       type: String,
-      enum: ['L', 'M', 'Q', 'H'],
-      default: 'M',
+      enum: ["L", "M", "Q", "H"],
+      default: "M",
     },
     borderWidth: { type: Number, default: 0 },
-    borderColor: { type: String, default: '#000000' },
+    borderColor: { type: String, default: "#000000" },
+    borderPadding: { type: Number, default: 0 },
 
     // ── Edit tracking ─────────────────────────────────────────────────────────
     editHistory: { type: [EditHistorySchema], default: [] },
@@ -127,14 +136,14 @@ const QrCodeSchema = new Schema<IQrCodeDocument>(
   },
   {
     timestamps: true,
-    collection: 'qrcodes',
-  }
+    collection: "qrcodes",
+  },
 );
 
 QrCodeSchema.index({ createdAt: -1 });
 
 const QrCode: Model<IQrCodeDocument> =
   mongoose.models.QrCode ??
-  mongoose.model<IQrCodeDocument>('QrCode', QrCodeSchema);
+  mongoose.model<IQrCodeDocument>("QrCode", QrCodeSchema);
 
 export default QrCode;

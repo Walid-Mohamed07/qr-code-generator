@@ -1,30 +1,31 @@
-﻿import { create } from 'zustand';
-import type { IQrCode, IQrFormState, IQrCustomization } from '@/types';
+﻿import { create } from "zustand";
+import type { IQrCode, IQrFormState, IQrCustomization } from "@/types";
 
 // -- Default form values ------------------------------------------------------
 
 const DEFAULT_CUSTOMIZATION: IQrCustomization = {
   size: 256,
-  foreground: '#000000',
-  background: '#FFFFFF',
-  dotStyle: 'square',
-  cornerSquareStyle: 'square',
-  cornerDotStyle: 'square',
-  cornerSquareColor: '#000000',
-  cornerDotColor: '#000000',
+  foreground: "#000000",
+  background: "#FFFFFF",
+  dotStyle: "square",
+  cornerSquareStyle: "square",
+  cornerDotStyle: "square",
+  cornerSquareColor: "#000000",
+  cornerDotColor: "#000000",
   logo: undefined,
   logoSize: 20,
-  logoBackgroundColor: '#FFFFFF',
+  logoBackgroundColor: "#FFFFFF",
   margin: 4,
-  errorCorrectionLevel: 'M',
+  errorCorrectionLevel: "M",
   borderWidth: 0,
-  borderColor: '#000000',
+  borderColor: "#000000",
+  borderPadding: 0,
 };
 
 const DEFAULT_FORM: IQrFormState = {
-  type: 'URL',
-  content: '',
-  label: '',
+  type: "URL",
+  content: "",
+  label: "",
   ...DEFAULT_CUSTOMIZATION,
 };
 
@@ -44,12 +45,12 @@ interface QrStoreActions {
   /** Update any single form field (content, label, type) */
   setFormField: <K extends keyof IQrFormState>(
     field: K,
-    value: IQrFormState[K]
+    value: IQrFormState[K],
   ) => void;
   /** Update any single customization field */
   setCustomization: <K extends keyof IQrCustomization>(
     field: K,
-    value: IQrCustomization[K]
+    value: IQrCustomization[K],
   ) => void;
   setPreviewDataUrl: (url: string | null) => void;
   setIsGenerating: (value: boolean) => void;
@@ -72,7 +73,7 @@ export const useQrStore = create<QrStore>((set) => ({
   previewDataUrl: null,
   isGenerating: false,
   editingId: null,
-  editNote: '',
+  editNote: "",
 
   // -- Actions --
 
@@ -93,12 +94,12 @@ export const useQrStore = create<QrStore>((set) => ({
   loadQrForEdit: (qr) =>
     set({
       editingId: qr._id,
-      editNote: '',
+      editNote: "",
       previewDataUrl: null,
       formState: {
         type: qr.type,
         content: qr.content,
-        label: qr.label ?? '',
+        label: qr.label ?? "",
         size: qr.size,
         foreground: qr.foreground,
         background: qr.background,
@@ -114,6 +115,7 @@ export const useQrStore = create<QrStore>((set) => ({
         errorCorrectionLevel: qr.errorCorrectionLevel,
         borderWidth: qr.borderWidth,
         borderColor: qr.borderColor,
+        borderPadding: qr.borderPadding,
       },
     }),
 
@@ -122,11 +124,11 @@ export const useQrStore = create<QrStore>((set) => ({
       id === null
         ? {
             editingId: null,
-            editNote: '',
+            editNote: "",
             formState: { ...DEFAULT_FORM },
             previewDataUrl: null,
           }
-        : { ...state, editingId: id }
+        : { ...state, editingId: id },
     ),
 
   setEditNote: (note) => set({ editNote: note }),
@@ -137,6 +139,6 @@ export const useQrStore = create<QrStore>((set) => ({
       previewDataUrl: null,
       isGenerating: false,
       editingId: null,
-      editNote: '',
+      editNote: "",
     }),
 }));

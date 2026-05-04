@@ -131,6 +131,7 @@ export default function HistoryTable({ items }: HistoryTableProps) {
         errorCorrectionLevel: item.errorCorrectionLevel,
         borderWidth: item.borderWidth,
         borderColor: item.borderColor,
+        borderPadding: item.borderPadding,
       });
       const a = document.createElement("a");
       a.href = dataUrl;

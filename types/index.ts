@@ -42,6 +42,8 @@ export interface IQrCustomization {
   borderWidth: number;
   /** Color of the border when borderWidth > 0. */
   borderColor: string;
+  /** Padding in px between the inner edge of the border and the QR image. */
+  borderPadding: number;
 }
 
 // ── Edit history ──────────────────────────────────────────────────────────────

@@ -8,8 +8,13 @@
  * (Canvas, Blob, URL.createObjectURL) that are not available on the server.
  */
 
-import type { IQrCustomization } from '@/types';
-import type { Options, DotType, CornerSquareType, CornerDotType } from 'qr-code-styling';
+import type { IQrCustomization } from "@/types";
+import type {
+  Options,
+  DotType,
+  CornerSquareType,
+  CornerDotType,
+} from "qr-code-styling";
 
 // ── Type mappers ──────────────────────────────────────────────────────────────
 
@@ -17,7 +22,7 @@ import type { Options, DotType, CornerSquareType, CornerDotType } from 'qr-code-
  * Our DotStyle includes 'square' which maps to 'square' in qr-code-styling.
  * All other values are identical strings — the cast is safe.
  */
-function mapDotType(style: IQrCustomization['dotStyle']): DotType {
+function mapDotType(style: IQrCustomization["dotStyle"]): DotType {
   return style as DotType;
 }
 
@@ -25,9 +30,9 @@ function mapDotType(style: IQrCustomization['dotStyle']): DotType {
  * Our CornerSquareStyle 'none' has no equivalent; fall back to 'square'.
  */
 function mapCornerSquareType(
-  style: IQrCustomization['cornerSquareStyle']
+  style: IQrCustomization["cornerSquareStyle"],
 ): CornerSquareType | undefined {
-  if (style === 'none') return undefined;
+  if (style === "none") return undefined;
   return style as CornerSquareType;
 }
 
@@ -36,17 +41,15 @@ function mapCornerSquareType(
  * so the library uses its default (inherits from dotsOptions).
  */
 function mapCornerDotType(
-  style: IQrCustomization['cornerDotStyle']
+  style: IQrCustomization["cornerDotStyle"],
 ): CornerDotType | undefined {
-  if (style === 'none') return undefined;
+  if (style === "none") return undefined;
   return style as CornerDotType;
 }
 
 // ── Build Options object ──────────────────────────────────────────────────────
 
-function buildOptions(
-  opts: IQrCustomization & { content: string }
-): Options {
+function buildOptions(opts: IQrCustomization & { content: string }): Options {
   const {
     content,
     size,
@@ -97,7 +100,7 @@ function buildOptions(
       imageSize: logoSize / 100,
       margin: 2,
       // Allow cross-origin logos (data URLs don't need this, but external URLs do)
-      crossOrigin: 'anonymous',
+      crossOrigin: "anonymous",
     };
     // Logo backing colour — applied via backgroundOptions on the image container;
     // qr-code-styling doesn't have a direct logoBackgroundColor option so we
@@ -116,45 +119,50 @@ function buildOptions(
  * Safe to call from `useEffect` / event handlers — never on the server.
  */
 export async function generateQrDataUrl(
-  opts: IQrCustomization & { content: string }
+  opts: IQrCustomization & { content: string },
 ): Promise<string> {
-  const { size, borderWidth, borderColor } = opts;
-  const QRCodeStyling = (await import('qr-code-styling')).default;
+  const { size, borderWidth, borderColor, borderPadding } = opts;
+  const QRCodeStyling = (await import("qr-code-styling")).default;
 
-  // When a border is requested, render the QR at the inner (smaller) size,
-  // then composite it onto a full-size canvas filled with the border colour.
-  const innerSize = borderWidth > 0 ? Math.max(64, size - borderWidth * 2) : size;
-  const renderOpts = borderWidth > 0 ? { ...opts, size: innerSize } : opts;
+  // When a border or padding is requested, render the QR at the inner (smaller)
+  // size, then composite it onto a full-size canvas filled with the border colour.
+  const offset = borderWidth + borderPadding;
+  const innerSize = offset > 0 ? Math.max(64, size - offset * 2) : size;
+  const renderOpts = offset > 0 ? { ...opts, size: innerSize } : opts;
 
-  const qr = new QRCodeStyling({ ...buildOptions(renderOpts), type: 'canvas' });
+  const qr = new QRCodeStyling({ ...buildOptions(renderOpts), type: "canvas" });
 
-  const blob = await qr.getRawData('png');
-  if (!blob) throw new Error('QR generation returned no data');
+  const blob = await qr.getRawData("png");
+  if (!blob) throw new Error("QR generation returned no data");
 
   const innerDataUrl = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(new Error('Failed to read QR blob'));
+    reader.onerror = () => reject(new Error("Failed to read QR blob"));
     reader.readAsDataURL(blob as Blob);
   });
 
-  if (borderWidth <= 0) return innerDataUrl;
+  if (offset <= 0) return innerDataUrl;
 
-  // Composite the QR image onto a bordered canvas
+  // Composite the QR image onto a bordered + padded canvas
   return new Promise<string>((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = size;
       canvas.height = size;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) { reject(new Error('Canvas context unavailable')); return; }
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        reject(new Error("Canvas context unavailable"));
+        return;
+      }
       ctx.fillStyle = borderColor;
       ctx.fillRect(0, 0, size, size);
-      ctx.drawImage(img, borderWidth, borderWidth, innerSize, innerSize);
-      resolve(canvas.toDataURL('image/png'));
+      ctx.drawImage(img, offset, offset, innerSize, innerSize);
+      resolve(canvas.toDataURL("image/png"));
     };
-    img.onerror = () => reject(new Error('Failed to load QR image for border compositing'));
+    img.onerror = () =>
+      reject(new Error("Failed to load QR image for border compositing"));
     img.src = innerDataUrl;
   });
 }
@@ -164,19 +172,19 @@ export async function generateQrDataUrl(
  * Useful for vector downloads.
  */
 export async function generateQrSvgString(
-  opts: IQrCustomization & { content: string }
+  opts: IQrCustomization & { content: string },
 ): Promise<string> {
-  const QRCodeStyling = (await import('qr-code-styling')).default;
+  const QRCodeStyling = (await import("qr-code-styling")).default;
 
-  const qr = new QRCodeStyling({ ...buildOptions(opts), type: 'svg' });
+  const qr = new QRCodeStyling({ ...buildOptions(opts), type: "svg" });
 
-  const blob = await qr.getRawData('svg');
-  if (!blob) throw new Error('QR SVG generation returned no data');
+  const blob = await qr.getRawData("svg");
+  if (!blob) throw new Error("QR SVG generation returned no data");
 
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(new Error('Failed to read SVG blob'));
+    reader.onerror = () => reject(new Error("Failed to read SVG blob"));
     reader.readAsText(blob as Blob);
   });
 }
@@ -187,21 +195,21 @@ export async function generateQrSvgString(
  */
 export async function drawQrToCanvas(
   canvas: HTMLCanvasElement,
-  opts: IQrCustomization & { content: string }
+  opts: IQrCustomization & { content: string },
 ): Promise<void> {
-  const QRCodeStyling = (await import('qr-code-styling')).default;
+  const QRCodeStyling = (await import("qr-code-styling")).default;
 
   // qr-code-styling renders by appending into a container element.
   // We create a temporary off-screen div, append there, then copy the
   // resulting canvas pixels into the caller's canvas.
-  const container = document.createElement('div');
-  container.style.position = 'absolute';
-  container.style.visibility = 'hidden';
+  const container = document.createElement("div");
+  container.style.position = "absolute";
+  container.style.visibility = "hidden";
   // Must be in the DOM for the library to measure / render correctly
   document.body.appendChild(container);
 
   try {
-    const qr = new QRCodeStyling({ ...buildOptions(opts), type: 'canvas' });
+    const qr = new QRCodeStyling({ ...buildOptions(opts), type: "canvas" });
     qr.append(container);
 
     // Wait for the async drawing promise to finish
@@ -209,21 +217,21 @@ export async function drawQrToCanvas(
     await new Promise<void>((resolve) => {
       const start = Date.now();
       const check = () => {
-        const child = container.querySelector('canvas');
+        const child = container.querySelector("canvas");
         if (child || Date.now() - start > 3000) resolve();
         else requestAnimationFrame(check);
       };
       requestAnimationFrame(check);
     });
 
-    const sourceCanvas = container.querySelector('canvas');
-    if (!sourceCanvas) throw new Error('QR canvas not found after render');
+    const sourceCanvas = container.querySelector("canvas");
+    if (!sourceCanvas) throw new Error("QR canvas not found after render");
 
     // Copy pixels to the caller's canvas
     canvas.width = sourceCanvas.width;
     canvas.height = sourceCanvas.height;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('Could not get 2d context');
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Could not get 2d context");
     ctx.drawImage(sourceCanvas, 0, 0);
   } finally {
     document.body.removeChild(container);
