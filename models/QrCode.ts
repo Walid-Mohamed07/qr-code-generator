@@ -40,11 +40,15 @@ export interface IQrCodeDocument extends Document {
   dotStyle: DotStyle;
   cornerSquareStyle: CornerSquareStyle;
   cornerDotStyle: CornerDotStyle;
+  cornerSquareColor: string;
+  cornerDotColor: string;
   logo?: string;
   logoSize: number;
   logoBackgroundColor: string;
   margin: number;
   errorCorrectionLevel: ErrorCorrectionLevel;
+  borderWidth: number;
+  borderColor: string;
 
   // Edit tracking
   editHistory: IEditHistoryEntry[];
@@ -99,6 +103,8 @@ const QrCodeSchema = new Schema<IQrCodeDocument>(
       enum: ['none', 'dot', 'square'],
       default: 'square',
     },
+    cornerSquareColor: { type: String, default: '#000000' },
+    cornerDotColor: { type: String, default: '#000000' },
     logo: { type: String },
     logoSize: { type: Number, default: 20 },
     logoBackgroundColor: { type: String, default: '#FFFFFF' },
@@ -108,6 +114,8 @@ const QrCodeSchema = new Schema<IQrCodeDocument>(
       enum: ['L', 'M', 'Q', 'H'],
       default: 'M',
     },
+    borderWidth: { type: Number, default: 0 },
+    borderColor: { type: String, default: '#000000' },
 
     // ── Edit tracking ─────────────────────────────────────────────────────────
     editHistory: { type: [EditHistorySchema], default: [] },

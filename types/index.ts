@@ -29,11 +29,19 @@ export interface IQrCustomization {
   dotStyle: DotStyle;
   cornerSquareStyle: CornerSquareStyle;
   cornerDotStyle: CornerDotStyle;
+  /** Independent color for the 3 finder-pattern corner squares. */
+  cornerSquareColor: string;
+  /** Independent color for the inner dots of the corner squares. */
+  cornerDotColor: string;
   logo?: string;
   logoSize: number;
   logoBackgroundColor: string;
   margin: number;
   errorCorrectionLevel: ErrorCorrectionLevel;
+  /** Border width in px drawn around the outside of the QR. 0 = none. */
+  borderWidth: number;
+  /** Color of the border when borderWidth > 0. */
+  borderColor: string;
 }
 
 // ── Edit history ──────────────────────────────────────────────────────────────

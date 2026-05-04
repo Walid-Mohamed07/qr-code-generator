@@ -122,11 +122,15 @@ export default function HistoryTable({ items }: HistoryTableProps) {
         dotStyle: item.dotStyle,
         cornerSquareStyle: item.cornerSquareStyle,
         cornerDotStyle: item.cornerDotStyle,
+        cornerSquareColor: item.cornerSquareColor,
+        cornerDotColor: item.cornerDotColor,
         logo: item.logo,
         logoSize: item.logoSize,
         logoBackgroundColor: item.logoBackgroundColor,
         margin: item.margin,
         errorCorrectionLevel: item.errorCorrectionLevel,
+        borderWidth: item.borderWidth,
+        borderColor: item.borderColor,
       });
       const a = document.createElement("a");
       a.href = dataUrl;

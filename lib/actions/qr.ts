@@ -51,6 +51,14 @@ const qrSchema = z.object({
     .optional(),
   cornerSquareStyle: z.enum(['none', 'dot', 'square', 'extra-rounded']).optional(),
   cornerDotStyle: z.enum(['none', 'dot', 'square']).optional(),
+  cornerSquareColor: z
+    .string()
+    .regex(HEX_COLOR_RE, 'cornerSquareColor must be a 6-digit hex color')
+    .optional(),
+  cornerDotColor: z
+    .string()
+    .regex(HEX_COLOR_RE, 'cornerDotColor must be a 6-digit hex color')
+    .optional(),
   logo: z.string().optional(),
   logoSize: z.number().min(10).max(40).optional(),
   logoBackgroundColor: z
@@ -59,6 +67,11 @@ const qrSchema = z.object({
     .optional(),
   margin: z.number().min(0).max(10).optional(),
   errorCorrectionLevel: z.enum(['L', 'M', 'Q', 'H']).optional(),
+  borderWidth: z.number().int().min(0).max(30).optional(),
+  borderColor: z
+    .string()
+    .regex(HEX_COLOR_RE, 'borderColor must be a 6-digit hex color')
+    .optional(),
 });
 
 // Partial variant for updateQr
@@ -106,12 +119,16 @@ function serialise(doc: Record<string, unknown>): IQrCode {
       (doc.cornerSquareStyle as IQrCode['cornerSquareStyle']) ?? 'square',
     cornerDotStyle:
       (doc.cornerDotStyle as IQrCode['cornerDotStyle']) ?? 'square',
+    cornerSquareColor: (doc.cornerSquareColor as string) ?? '#000000',
+    cornerDotColor: (doc.cornerDotColor as string) ?? '#000000',
     logo: doc.logo as string | undefined,
     logoSize: (doc.logoSize as number) ?? 20,
     logoBackgroundColor: (doc.logoBackgroundColor as string) ?? '#FFFFFF',
     margin: (doc.margin as number) ?? 4,
     errorCorrectionLevel:
       (doc.errorCorrectionLevel as IQrCode['errorCorrectionLevel']) ?? 'M',
+    borderWidth: (doc.borderWidth as number) ?? 0,
+    borderColor: (doc.borderColor as string) ?? '#000000',
 
     // Edit tracking
     editHistory: serialiseEditHistory(
@@ -147,8 +164,9 @@ export async function createQr(
     type, content, label,
     foreground, background, size,
     dotStyle, cornerSquareStyle, cornerDotStyle,
+    cornerSquareColor, cornerDotColor,
     logo, logoSize, logoBackgroundColor, margin,
-    errorCorrectionLevel,
+    errorCorrectionLevel, borderWidth, borderColor,
   } = parsed.data;
 
   // Force high error correction when a logo is embedded
@@ -168,11 +186,15 @@ export async function createQr(
       dotStyle: dotStyle ?? 'square',
       cornerSquareStyle: cornerSquareStyle ?? 'square',
       cornerDotStyle: cornerDotStyle ?? 'square',
+      cornerSquareColor: cornerSquareColor ?? '#000000',
+      cornerDotColor: cornerDotColor ?? '#000000',
       logo,
       logoSize: logoSize ?? 20,
       logoBackgroundColor: logoBackgroundColor ?? '#FFFFFF',
       margin: margin ?? 4,
       errorCorrectionLevel: ecl,
+      borderWidth: borderWidth ?? 0,
+      borderColor: borderColor ?? '#000000',
     });
 
     revalidatePath('/history');

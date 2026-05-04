@@ -388,10 +388,14 @@ export default function QrGeneratorForm({ onSaved }: QrGeneratorFormProps) {
     formState.dotStyle,
     formState.cornerSquareStyle,
     formState.cornerDotStyle,
+    formState.cornerSquareColor,
+    formState.cornerDotColor,
     formState.logo,
     formState.logoSize,
     formState.margin,
     formState.errorCorrectionLevel,
+    formState.borderWidth,
+    formState.borderColor,
   ]);
 
   // ── Type change ────────────────────────────────────────────────────────────
@@ -645,6 +649,34 @@ export default function QrGeneratorForm({ onSaved }: QrGeneratorFormProps) {
               onChange={(v) => setCustomization('cornerDotStyle', v)}
             />
 
+            {/* Section 4 — Corner Colors */}
+            <div className="flex flex-col gap-3">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Corner Colors</span>
+              <div className="grid grid-cols-2 gap-4">
+                {(
+                  [
+                    { field: 'cornerSquareColor', label: 'Corner Square' },
+                    { field: 'cornerDotColor',    label: 'Corner Dot'    },
+                  ] as const
+                ).map(({ field, label }) => (
+                  <div key={field} className="flex flex-col gap-1">
+                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400">{label}</label>
+                    <div className="flex items-center gap-2 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 bg-white dark:bg-gray-900">
+                      <input
+                        type="color"
+                        value={formState[field]}
+                        onChange={(e) => setCustomization(field, e.target.value)}
+                        className="w-7 h-7 rounded cursor-pointer border-0 bg-transparent p-0"
+                      />
+                      <span className="text-xs font-mono text-gray-600 dark:text-gray-300">
+                        {formState[field].toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Section 4 — Logo Upload */}
             <div className="flex flex-col gap-3">
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Logo</span>
@@ -793,6 +825,52 @@ export default function QrGeneratorForm({ onSaved }: QrGeneratorFormProps) {
                   })}
                 </div>
               </div>
+            </div>
+
+            {/* Section 6 — Border */}
+            <div className="flex flex-col gap-4">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Border</span>
+
+              {/* Border width */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                  Width:{' '}
+                  <span className="text-gray-800 dark:text-gray-200 font-semibold">
+                    {formState.borderWidth === 0 ? 'None' : `${formState.borderWidth}px`}
+                  </span>
+                </label>
+                <input
+                  type="range"
+                  min={0}
+                  max={30}
+                  step={2}
+                  value={formState.borderWidth}
+                  onChange={(e) => setCustomization('borderWidth', Number(e.target.value))}
+                  className="w-full accent-indigo-600"
+                />
+                <div className="flex justify-between text-xs text-gray-400">
+                  <span>None</span>
+                  <span>30px</span>
+                </div>
+              </div>
+
+              {/* Border color — only visible when width > 0 */}
+              {formState.borderWidth > 0 && (
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Border Color</label>
+                  <div className="flex items-center gap-2 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 bg-white dark:bg-gray-900 w-fit">
+                    <input
+                      type="color"
+                      value={formState.borderColor}
+                      onChange={(e) => setCustomization('borderColor', e.target.value)}
+                      className="w-7 h-7 rounded cursor-pointer border-0 bg-transparent p-0"
+                    />
+                    <span className="text-xs font-mono text-gray-600 dark:text-gray-300">
+                      {formState.borderColor.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
           </div>

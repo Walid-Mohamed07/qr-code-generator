@@ -10,11 +10,15 @@ const DEFAULT_CUSTOMIZATION: IQrCustomization = {
   dotStyle: 'square',
   cornerSquareStyle: 'square',
   cornerDotStyle: 'square',
+  cornerSquareColor: '#000000',
+  cornerDotColor: '#000000',
   logo: undefined,
   logoSize: 20,
   logoBackgroundColor: '#FFFFFF',
   margin: 4,
   errorCorrectionLevel: 'M',
+  borderWidth: 0,
+  borderColor: '#000000',
 };
 
 const DEFAULT_FORM: IQrFormState = {
@@ -101,11 +105,15 @@ export const useQrStore = create<QrStore>((set) => ({
         dotStyle: qr.dotStyle,
         cornerSquareStyle: qr.cornerSquareStyle,
         cornerDotStyle: qr.cornerDotStyle,
+        cornerSquareColor: qr.cornerSquareColor,
+        cornerDotColor: qr.cornerDotColor,
         logo: qr.logo,
         logoSize: qr.logoSize,
         logoBackgroundColor: qr.logoBackgroundColor,
         margin: qr.margin,
         errorCorrectionLevel: qr.errorCorrectionLevel,
+        borderWidth: qr.borderWidth,
+        borderColor: qr.borderColor,
       },
     }),
 
