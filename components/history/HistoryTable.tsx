@@ -17,7 +17,7 @@ import {
   Download,
 } from "lucide-react";
 import { deleteQr, resetQr } from "@/lib/actions/qr";
-import { drawQrToCanvas } from "@/lib/qr-renderer";
+import { generateQrDataUrl } from "@/lib/qr-renderer";
 import { truncate, formatDate } from "@/lib/utils";
 import { useQrStore } from "@/store/qr-store";
 import Badge from "@/components/ui/Badge";
@@ -114,8 +114,7 @@ export default function HistoryTable({ items }: HistoryTableProps) {
   const handleDownload = async (item: IQrCode) => {
     setDownloadingId(item._id);
     try {
-      const canvas = document.createElement('canvas');
-      await drawQrToCanvas(canvas, {
+      const dataUrl = await generateQrDataUrl({
         content: item.content,
         size: 512,
         foreground: item.foreground,
@@ -129,12 +128,12 @@ export default function HistoryTable({ items }: HistoryTableProps) {
         margin: item.margin,
         errorCorrectionLevel: item.errorCorrectionLevel,
       });
-      const a = document.createElement('a');
-      a.href = canvas.toDataURL('image/png');
+      const a = document.createElement("a");
+      a.href = dataUrl;
       a.download = `${item.label ?? item.publicId}.png`;
       a.click();
     } catch {
-      toast.error('Failed to download QR code');
+      toast.error("Failed to download QR code");
     } finally {
       setDownloadingId(null);
     }
@@ -264,9 +263,17 @@ export default function HistoryTable({ items }: HistoryTableProps) {
                 <td className="px-4 py-3">
                   <QrThumbnail
                     content={item.content}
+                    size={48}
                     foreground={item.foreground}
                     background={item.background}
-                    size={48}
+                    dotStyle={item.dotStyle}
+                    cornerSquareStyle={item.cornerSquareStyle}
+                    cornerDotStyle={item.cornerDotStyle}
+                    logo={item.logo}
+                    logoSize={item.logoSize}
+                    logoBackgroundColor={item.logoBackgroundColor}
+                    margin={item.margin}
+                    errorCorrectionLevel={item.errorCorrectionLevel}
                   />
                 </td>
 
@@ -312,7 +319,11 @@ export default function HistoryTable({ items }: HistoryTableProps) {
                     <button
                       type="button"
                       title="Download QR code"
-                      disabled={isNavigatingToEdit || resettingId === item._id || downloadingId === item._id}
+                      disabled={
+                        isNavigatingToEdit ||
+                        resettingId === item._id ||
+                        downloadingId === item._id
+                      }
                       onClick={() => void handleDownload(item)}
                       className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
