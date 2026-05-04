@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useMemo, memo } from 'react';
-import { generateQrDataUrl } from '@/lib/qr-renderer';
-import type { IQrCustomization } from '@/types';
+import { useEffect, useState, useMemo, memo } from "react";
+import { generateQrDataUrl } from "@/lib/qr-renderer";
+import type { IQrCustomization } from "@/types";
 
 /**
  * All IQrCustomization fields are optional here so callers can pass only the
@@ -18,20 +18,21 @@ interface QrThumbnailProps extends Partial<IQrCustomization> {
 const QrThumbnail = memo(function QrThumbnail({
   content,
   size = 48,
-  foreground = '#000000',
-  background = '#FFFFFF',
-  dotStyle = 'square',
-  cornerSquareStyle = 'square',
-  cornerDotStyle = 'square',
-  cornerSquareColor = '#000000',
-  cornerDotColor = '#000000',
+  foreground = "#000000",
+  background = "#FFFFFF",
+  dotStyle = "square",
+  cornerSquareStyle = "square",
+  cornerDotStyle = "square",
+  cornerSquareColor = "#000000",
+  cornerDotColor = "#000000",
   logo,
   logoSize = 20,
-  logoBackgroundColor = '#FFFFFF',
+  logoBackgroundColor = "#FFFFFF",
   margin = 4,
-  errorCorrectionLevel = 'M',
+  errorCorrectionLevel = "M",
   borderWidth = 0,
-  borderColor = '#000000',
+  borderColor = "#000000",
+  borderPadding = 0,
 }: QrThumbnailProps) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
 
@@ -54,6 +55,7 @@ const QrThumbnail = memo(function QrThumbnail({
       errorCorrectionLevel,
       borderWidth,
       borderColor,
+      borderPadding,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -72,16 +74,21 @@ const QrThumbnail = memo(function QrThumbnail({
       errorCorrectionLevel,
       borderWidth,
       borderColor,
-    ]
+      borderPadding,
+    ],
   );
 
   useEffect(() => {
     if (!content.trim()) return;
     let cancelled = false;
     generateQrDataUrl(opts)
-      .then((url) => { if (!cancelled) setDataUrl(url); })
+      .then((url) => {
+        if (!cancelled) setDataUrl(url);
+      })
       .catch(() => {});
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [opts, content]);
 
   if (!dataUrl) {
@@ -107,4 +114,3 @@ const QrThumbnail = memo(function QrThumbnail({
 });
 
 export default QrThumbnail;
-
