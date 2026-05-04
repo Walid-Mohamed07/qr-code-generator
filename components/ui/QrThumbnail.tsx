@@ -23,11 +23,15 @@ const QrThumbnail = memo(function QrThumbnail({
   dotStyle = 'square',
   cornerSquareStyle = 'square',
   cornerDotStyle = 'square',
+  cornerSquareColor = '#000000',
+  cornerDotColor = '#000000',
   logo,
   logoSize = 20,
   logoBackgroundColor = '#FFFFFF',
   margin = 4,
   errorCorrectionLevel = 'M',
+  borderWidth = 0,
+  borderColor = '#000000',
 }: QrThumbnailProps) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
 
@@ -41,11 +45,15 @@ const QrThumbnail = memo(function QrThumbnail({
       dotStyle,
       cornerSquareStyle,
       cornerDotStyle,
+      cornerSquareColor,
+      cornerDotColor,
       logo,
       logoSize,
       logoBackgroundColor,
       margin,
       errorCorrectionLevel,
+      borderWidth,
+      borderColor,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -55,11 +63,15 @@ const QrThumbnail = memo(function QrThumbnail({
       dotStyle,
       cornerSquareStyle,
       cornerDotStyle,
+      cornerSquareColor,
+      cornerDotColor,
       logo,
       logoSize,
       logoBackgroundColor,
       margin,
       errorCorrectionLevel,
+      borderWidth,
+      borderColor,
     ]
   );
 

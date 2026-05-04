@@ -55,6 +55,8 @@ function buildOptions(
     dotStyle,
     cornerSquareStyle,
     cornerDotStyle,
+    cornerSquareColor,
+    cornerDotColor,
     logo,
     logoSize,
     logoBackgroundColor,
@@ -76,11 +78,11 @@ function buildOptions(
     },
     cornersSquareOptions: {
       type: mapCornerSquareType(cornerSquareStyle),
-      color: foreground,
+      color: cornerSquareColor,
     },
     cornersDotOptions: {
       type: mapCornerDotType(cornerDotStyle),
-      color: foreground,
+      color: cornerDotColor,
     },
     backgroundOptions: {
       color: background,
@@ -116,18 +118,44 @@ function buildOptions(
 export async function generateQrDataUrl(
   opts: IQrCustomization & { content: string }
 ): Promise<string> {
+  const { size, borderWidth, borderColor } = opts;
   const QRCodeStyling = (await import('qr-code-styling')).default;
 
-  const qr = new QRCodeStyling({ ...buildOptions(opts), type: 'canvas' });
+  // When a border is requested, render the QR at the inner (smaller) size,
+  // then composite it onto a full-size canvas filled with the border colour.
+  const innerSize = borderWidth > 0 ? Math.max(64, size - borderWidth * 2) : size;
+  const renderOpts = borderWidth > 0 ? { ...opts, size: innerSize } : opts;
+
+  const qr = new QRCodeStyling({ ...buildOptions(renderOpts), type: 'canvas' });
 
   const blob = await qr.getRawData('png');
   if (!blob) throw new Error('QR generation returned no data');
 
-  return new Promise<string>((resolve, reject) => {
+  const innerDataUrl = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
     reader.onerror = () => reject(new Error('Failed to read QR blob'));
     reader.readAsDataURL(blob as Blob);
+  });
+
+  if (borderWidth <= 0) return innerDataUrl;
+
+  // Composite the QR image onto a bordered canvas
+  return new Promise<string>((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { reject(new Error('Canvas context unavailable')); return; }
+      ctx.fillStyle = borderColor;
+      ctx.fillRect(0, 0, size, size);
+      ctx.drawImage(img, borderWidth, borderWidth, innerSize, innerSize);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = () => reject(new Error('Failed to load QR image for border compositing'));
+    img.src = innerDataUrl;
   });
 }
 
