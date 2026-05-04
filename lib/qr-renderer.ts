@@ -121,14 +121,21 @@ function buildOptions(opts: IQrCustomization & { content: string }): Options {
 export async function generateQrDataUrl(
   opts: IQrCustomization & { content: string },
 ): Promise<string> {
-  const { size, borderWidth, borderColor, borderPadding } = opts;
+  const {
+    size,
+    borderWidth,
+    borderColor,
+    borderPadding,
+    borderOuterPadding,
+    background,
+  } = opts;
   const QRCodeStyling = (await import("qr-code-styling")).default;
 
   // When a border or padding is requested, render the QR at the inner (smaller)
   // size, then composite it onto a full-size canvas filled with the border colour.
-  const offset = borderWidth + borderPadding;
-  const innerSize = offset > 0 ? Math.max(64, size - offset * 2) : size;
-  const renderOpts = offset > 0 ? { ...opts, size: innerSize } : opts;
+  const qrOffset = borderOuterPadding + borderWidth + borderPadding;
+  const innerSize = qrOffset > 0 ? Math.max(64, size - qrOffset * 2) : size;
+  const renderOpts = qrOffset > 0 ? { ...opts, size: innerSize } : opts;
 
   const qr = new QRCodeStyling({ ...buildOptions(renderOpts), type: "canvas" });
 
@@ -142,7 +149,7 @@ export async function generateQrDataUrl(
     reader.readAsDataURL(blob as Blob);
   });
 
-  if (offset <= 0) return innerDataUrl;
+  if (qrOffset <= 0) return innerDataUrl;
 
   // Composite the QR image onto a bordered + padded canvas
   return new Promise<string>((resolve, reject) => {
@@ -156,9 +163,18 @@ export async function generateQrDataUrl(
         reject(new Error("Canvas context unavailable"));
         return;
       }
-      ctx.fillStyle = borderColor;
+      // Outer padding region uses the QR background colour
+      ctx.fillStyle = background;
       ctx.fillRect(0, 0, size, size);
-      ctx.drawImage(img, offset, offset, innerSize, innerSize);
+      // Border + inner padding region uses the border colour
+      ctx.fillStyle = borderColor;
+      ctx.fillRect(
+        borderOuterPadding,
+        borderOuterPadding,
+        size - 2 * borderOuterPadding,
+        size - 2 * borderOuterPadding,
+      );
+      ctx.drawImage(img, qrOffset, qrOffset, innerSize, innerSize);
       resolve(canvas.toDataURL("image/png"));
     };
     img.onerror = () =>

@@ -424,6 +424,7 @@ export default function QrGeneratorForm({ onSaved }: QrGeneratorFormProps) {
     formState.borderWidth,
     formState.borderColor,
     formState.borderPadding,
+    formState.borderOuterPadding,
   ]);
 
   // ── Type change ────────────────────────────────────────────────────────────
@@ -948,6 +949,38 @@ export default function QrGeneratorForm({ onSaved }: QrGeneratorFormProps) {
                     value={formState.borderPadding}
                     onChange={(e) =>
                       setCustomization("borderPadding", Number(e.target.value))
+                    }
+                    className="w-full accent-indigo-600"
+                  />
+                  <div className="flex justify-between text-xs text-gray-400">
+                    <span>None</span>
+                    <span>40px</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Outer padding — only visible when width > 0 */}
+              {formState.borderWidth > 0 && (
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                    Outer Padding:{" "}
+                    <span className="text-gray-800 dark:text-gray-200 font-semibold">
+                      {formState.borderOuterPadding === 0
+                        ? "None"
+                        : `${formState.borderOuterPadding}px`}
+                    </span>
+                  </label>
+                  <input
+                    type="range"
+                    min={0}
+                    max={40}
+                    step={2}
+                    value={formState.borderOuterPadding}
+                    onChange={(e) =>
+                      setCustomization(
+                        "borderOuterPadding",
+                        Number(e.target.value),
+                      )
                     }
                     className="w-full accent-indigo-600"
                   />

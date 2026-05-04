@@ -84,6 +84,7 @@ const qrSchema = z.object({
     .regex(HEX_COLOR_RE, "borderColor must be a 6-digit hex color")
     .optional(),
   borderPadding: z.number().int().min(0).max(40).optional(),
+  borderOuterPadding: z.number().int().min(0).max(40).optional(),
 });
 
 // Partial variant for updateQr
@@ -142,7 +143,7 @@ function serialise(doc: Record<string, unknown>): IQrCode {
     borderWidth: (doc.borderWidth as number) ?? 0,
     borderColor: (doc.borderColor as string) ?? "#000000",
     borderPadding: (doc.borderPadding as number) ?? 0,
-
+    borderOuterPadding: (doc.borderOuterPadding as number) ?? 0,
     // Edit tracking
     editHistory: serialiseEditHistory((doc.editHistory as unknown[]) ?? []),
     lastEditedAt:
@@ -191,6 +192,7 @@ export async function createQr(
     borderWidth,
     borderColor,
     borderPadding,
+    borderOuterPadding,
   } = parsed.data;
 
   // Force high error correction when a logo is embedded
@@ -220,6 +222,7 @@ export async function createQr(
       borderWidth: borderWidth ?? 0,
       borderColor: borderColor ?? "#000000",
       borderPadding: borderPadding ?? 0,
+      borderOuterPadding: borderOuterPadding ?? 0,
     });
 
     revalidatePath("/history");

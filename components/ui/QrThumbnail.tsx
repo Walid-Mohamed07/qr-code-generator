@@ -33,6 +33,7 @@ const QrThumbnail = memo(function QrThumbnail({
   borderWidth = 0,
   borderColor = "#000000",
   borderPadding = 0,
+  borderOuterPadding = 0,
 }: QrThumbnailProps) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
 
@@ -56,6 +57,7 @@ const QrThumbnail = memo(function QrThumbnail({
       borderWidth,
       borderColor,
       borderPadding,
+      borderOuterPadding,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -75,6 +77,7 @@ const QrThumbnail = memo(function QrThumbnail({
       borderWidth,
       borderColor,
       borderPadding,
+      borderOuterPadding,
     ],
   );
 

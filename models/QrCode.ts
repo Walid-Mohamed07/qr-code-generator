@@ -50,6 +50,7 @@ export interface IQrCodeDocument extends Document {
   borderWidth: number;
   borderColor: string;
   borderPadding: number;
+  borderOuterPadding: number;
 
   // Edit tracking
   editHistory: IEditHistoryEntry[];
@@ -125,7 +126,7 @@ const QrCodeSchema = new Schema<IQrCodeDocument>(
     borderWidth: { type: Number, default: 0 },
     borderColor: { type: String, default: "#000000" },
     borderPadding: { type: Number, default: 0 },
-
+    borderOuterPadding: { type: Number, default: 0 },
     // ── Edit tracking ─────────────────────────────────────────────────────────
     editHistory: { type: [EditHistorySchema], default: [] },
     lastEditedAt: { type: Date },

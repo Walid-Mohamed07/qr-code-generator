@@ -20,6 +20,7 @@ const DEFAULT_CUSTOMIZATION: IQrCustomization = {
   borderWidth: 0,
   borderColor: "#000000",
   borderPadding: 0,
+  borderOuterPadding: 0,
 };
 
 const DEFAULT_FORM: IQrFormState = {
@@ -116,6 +117,7 @@ export const useQrStore = create<QrStore>((set) => ({
         borderWidth: qr.borderWidth,
         borderColor: qr.borderColor,
         borderPadding: qr.borderPadding,
+        borderOuterPadding: qr.borderOuterPadding,
       },
     }),
 
