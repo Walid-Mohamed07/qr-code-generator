@@ -6,6 +6,7 @@ import {
   Copy,
   Check,
   Scan as ScanIcon,
+  Download,
 } from 'lucide-react';
 import {
   LineChart,
@@ -245,7 +246,7 @@ export default function QrDetailsModal({ qrId, onClose, refetchKey }: QrDetailsM
               {/* ── Section: Info header ─────────────────────────────────── */}
               <div className="px-6 py-6 flex flex-col sm:flex-row gap-6">
                 {/* QR Preview */}
-                <div className="shrink-0 flex items-start justify-center sm:justify-start">
+                <div className="shrink-0 flex flex-col items-center sm:items-start gap-2">
                   {previewDataUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -258,6 +259,16 @@ export default function QrDetailsModal({ qrId, onClose, refetchKey }: QrDetailsM
                     />
                   ) : (
                     <div className="w-48 h-48 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+                  )}
+                  {previewDataUrl && (
+                    <a
+                      href={previewDataUrl}
+                      download={`${details.qr.label ?? details.qr.publicId}.png`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-colors"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      Download PNG
+                    </a>
                   )}
                 </div>
 
