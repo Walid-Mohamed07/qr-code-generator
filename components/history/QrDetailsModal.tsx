@@ -172,7 +172,7 @@ export default function QrDetailsModal({ qrId, onClose, refetchKey }: QrDetailsM
 
   // Generate styled QR preview once details are loaded
   const generatePreview = useCallback(async (det: IQrDetails) => {
-    const scanUrl = `${window.location.origin}/${det.qr.publicId}`;
+    const scanUrl = `${window.location.origin}/api/scan/${det.qr.publicId}`;
     try {
       const dataUrl = await generateQrDataUrl({ ...det.qr, content: scanUrl });
       setPreviewDataUrl(dataUrl);
@@ -191,7 +191,7 @@ export default function QrDetailsModal({ qrId, onClose, refetchKey }: QrDetailsM
 
   const handleCopyScanUrl = () => {
     if (!details) return;
-    const url = `${window.location.origin}/${details.qr.publicId}`;
+    const url = `${window.location.origin}/api/scan/${details.qr.publicId}`;
     navigator.clipboard
       .writeText(url)
       .then(() => {
@@ -285,7 +285,7 @@ export default function QrDetailsModal({ qrId, onClose, refetchKey }: QrDetailsM
                   {/* Scan URL */}
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-mono text-gray-500 dark:text-gray-400 truncate max-w-[300px]">
-                      {`${typeof window !== 'undefined' ? window.location.origin : ''}/${details.qr.publicId}`}
+                      {`${typeof window !== 'undefined' ? window.location.origin : ''}/api/scan/${details.qr.publicId}`}
                     </span>
                     <button
                       type="button"

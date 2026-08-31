@@ -38,7 +38,7 @@ interface HistoryTableProps {
 // ── Row helpers ───────────────────────────────────────────────────────────────
 
 function copyUrl(publicId: string) {
-  const url = `${window.location.origin}/${publicId}`;
+  const url = `${window.location.origin}/api/scan/${publicId}`;
   navigator.clipboard
     .writeText(url)
     .then(() => toast.success("Copied to clipboard"))
@@ -115,7 +115,7 @@ export default function HistoryTable({ items }: HistoryTableProps) {
     setDownloadingId(item._id);
     try {
       const dataUrl = await generateQrDataUrl({
-        content: item.content,
+        content: `${window.location.origin}/api/scan/${item.publicId}`,
         size: 512,
         foreground: item.foreground,
         background: item.background,
@@ -358,7 +358,7 @@ export default function HistoryTable({ items }: HistoryTableProps) {
                       disabled={isNavigatingToEdit || resettingId === item._id}
                       onClick={() =>
                         setShareTarget({
-                          url: `${window.location.origin}/${item.publicId}`,
+                          url: `${window.location.origin}/api/scan/${item.publicId}`,
                           label: item.label ?? truncate(item.content, 40),
                         })
                       }
