@@ -3,6 +3,10 @@ import { connectDB } from '@/lib/mongoose';
 import QrCode from '@/models/QrCode';
 import ScanEvent, { parseDeviceType } from '@/models/ScanEvent';
 
+// Scan requests modify data, so they must never be served from a route cache.
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface RouteContext {
   params: { publicId: string };
 }
@@ -53,10 +57,12 @@ export async function GET(
     // For all other types: return the content as JSON so clients can
     // display it (e.g. copy a phone number, show a text message).
     if (qr.type === 'URL') {
-      return NextResponse.redirect(qr.content, { status: 302 });
+      const response = NextResponse.redirect(qr.content, { status: 302 });
+      response.headers.set('Cache-Control', 'no-store, max-age=0');
+      return response;
     }
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         data: {
           type: qr.type,
@@ -66,6 +72,8 @@ export async function GET(
       },
       { status: 200 }
     );
+    response.headers.set('Cache-Control', 'no-store, max-age=0');
+    return response;
   } catch (err: unknown) {
     console.error('[GET /api/scan/:publicId]', err);
     return NextResponse.json(
